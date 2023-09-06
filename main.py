@@ -3,9 +3,14 @@ import sys
 import pygame_gui as gui
 from engine import *
 
+menu = None
+
 def main():
+    global PAUSED, menu
     is_running = True
     """This is the Game's main function"""
+    if menu != None:
+        menu = None
     pg.init()
     pg.display.set_caption('Temper Run')
     window_surface = pg.display.set_mode((800, 600))
@@ -55,7 +60,6 @@ def main():
                     if event.ui_element == play_button:
                         game_active = True
                         print('OK')
-
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_p:
                         pause()
@@ -77,6 +81,9 @@ def main():
 
         if game_active:
             #if game ongoing update it
+            if PAUSED:
+                paused()
+                PAUSED = False
             #resume_button.hide()
             #resume_button.disable()
             play_button.disable()
@@ -88,9 +95,6 @@ def main():
             GG_button.hide()
             Exit_button.hide()
             game.update(window_surface)
-            while paused:
-                clock.tick(15)
-
         else:
             window_surface.blit(TitleText,(235, 25))
             window_surface.blit(VerText,(5, 561))
@@ -102,5 +106,5 @@ def main():
         
 
 if __name__ == '__main__':
-    main()
+    menu()
 
