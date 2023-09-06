@@ -1,5 +1,6 @@
 import pygame as pg
 import pygame_gui as gui
+import main
 import sys
 from pygame.locals import *
 from math import tan, floor , radians, pi, cos, atan, sin, degrees , ceil
@@ -10,6 +11,8 @@ from copy import deepcopy
 # TODO: get the actual screen size
 SCREEN_WIDTH = 800         #x resolution
 SCREEN_HEIGHT = 600       #y resolution
+PAUSED = False           #Check if game is paused
+GAME_OVER = False         #Check if game is over
 
 ASPECT_RATIO = SCREEN_WIDTH/SCREEN_HEIGHT
 
@@ -498,11 +501,13 @@ class Game():
 
     def update(self, window):
         """a frame of the game"""
+        global GAME_OVER
         # the player has y,z, and % x of the segment his y is on, 
         # and the camera folows player z, and y 
         # TODO: when the camera auto scroll, player z will be set by the players seg...
         # PLAYER SPEED ALWAYS ABOVE SEGMENT LENGTH!, since I cant be asked to deal with percentages.
         # also means NO SLOWING DOWNN WHOOOO
+        GAME_OVER = False
         keys = pg.key.get_pressed()
         # Camera Move
         self.player.moveZ()
@@ -584,11 +589,11 @@ def paused():
                                              text='Resume',
                                              manager=manager)
 
-    main_menu_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 210), (250, 50)),
+    main_menu_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 230), (250, 50)),
                                              text='Go to Main Menu',
                                              manager=manager)
     
-    exit_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 260), (250, 50)),
+    exit_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 300), (250, 50)),
                                              text='Exit',
                                              manager=manager)
     while is_running:
@@ -613,12 +618,67 @@ def paused():
         manager.update(time_delta)
         
         manager.draw_ui(window_surface)
-        window_surface.blit(TitleText,(320, 25))
+        window_surface.blit(TitleText,(325, 25))
+        pg.display.update()
+    
+    sys.exit()
+
+def game_over(score: int):
+    is_running = True
+    """This is the Game's main function"""
+    pg.init()
+    pg.display.set_caption('Game Over')
+    window_surface = pg.display.set_mode((800, 600))
+    
+    window_surface.fill(pg.Color('#87CEEB'))
+    manager = gui.UIManager((800, 600))
+    clock = pg.time.Clock()
+
+    pg.font.init() # you have to call this at the start, 
+                   # if you want to use this module.
+    TitleFont = pg.font.SysFont('Arial', 80)
+    TitleText = TitleFont.render('Pause', False, (0, 0, 0))
+    
+    
+    play_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 160), (250, 50)),
+                                             text='Play Again',
+                                             manager=manager)
+
+    main_menu_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 230), (250, 50)),
+                                             text='Go to Main Menu',
+                                             manager=manager)
+    
+    exit_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 300), (250, 50)),
+                                             text='Exit',
+                                             manager=manager)
+    while is_running:
+        time_delta = clock.tick(30)
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                is_running = False
+            if event.type == pg.USEREVENT:
+                if event.user_type == gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == play_button:
+                        menu.game_active = True
+                        return
+                if event.user_type == gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == main_menu_button:
+                        print('OK')
+                        return
+                if event.user_type == gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == exit_button:
+                        is_running = False 
+                
+            manager.process_events(event)
+        manager.update(time_delta)
+        
+        manager.draw_ui(window_surface)
+        window_surface.blit(TitleText,(325, 25))
         pg.display.update()
     
     sys.exit()
         
+
+
 if __name__ == "__main__":
     paused()
-
-   
