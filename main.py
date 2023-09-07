@@ -93,7 +93,7 @@ def main():
                 PAUSED = False
             game.update(window_surface)
         else:
-            window_surface.blit(bg, (0, 0))
+            #window_surface.blit(bg, (0, 0))
             manager.draw_ui(window_surface)
             window_surface.blit(TitleText,(235, 25))
             window_surface.blit(VerText,(5, 561))
