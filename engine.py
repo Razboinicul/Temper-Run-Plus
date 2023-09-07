@@ -3,7 +3,7 @@ import pygame_gui as gui
 import main
 import sys
 from pygame.locals import *
-from math import tan, floor , radians, pi, cos, atan, sin, degrees , ceil
+from math import tan, floor , radians, pi, cos, atan, sin, degrees, ceil
 from random import choice
 from time import sleep
 from copy import deepcopy
@@ -13,6 +13,7 @@ SCREEN_WIDTH = 800         #x resolution
 SCREEN_HEIGHT = 600       #y resolution
 PAUSED = False           #Check if game is paused
 GAME_OVER = False         #Check if game is over
+SCORE = 0                #Score
 
 ASPECT_RATIO = SCREEN_WIDTH/SCREEN_HEIGHT
 
@@ -501,7 +502,7 @@ class Game():
 
     def update(self, window):
         """a frame of the game"""
-        global GAME_OVER
+        global GAME_OVER, SCORE
         # the player has y,z, and % x of the segment his y is on, 
         # and the camera folows player z, and y 
         # TODO: when the camera auto scroll, player z will be set by the players seg...
@@ -561,7 +562,8 @@ class Game():
         # TODO: make the close sprites overlap with out sprite ... by drawing the player between the segments
         # Cheak if the game ended this frame....#
         collision = self.player.detectColision(closeSprits)   # cheaking colision with all the sprites is kinda lazy..
-        sys.exit() if collision else None
+        if collision: game_over(SCORE)
+        else: SCORE+=1
         #sleep(0.25) if collision else None
         
         collision = False
@@ -623,12 +625,15 @@ def paused():
     
     sys.exit()
 
-def game_over(score: int):
+def game_over(sc: int = 0):
+    global PAUSED, SCORE
     is_running = True
     """This is the Game's main function"""
     pg.init()
     pg.display.set_caption('Game Over')
     window_surface = pg.display.set_mode((800, 600))
+    
+    score = int(sc/30)
     
     window_surface.fill(pg.Color('#87CEEB'))
     manager = gui.UIManager((800, 600))
@@ -637,7 +642,9 @@ def game_over(score: int):
     pg.font.init() # you have to call this at the start, 
                    # if you want to use this module.
     TitleFont = pg.font.SysFont('Arial', 80)
-    TitleText = TitleFont.render('Pause', False, (0, 0, 0))
+    TitleText = TitleFont.render('Game Over', False, (0, 0, 0))
+    ScoreFont = pg.font.SysFont('Arial', 35)
+    ScoreText = ScoreFont.render(f'Score: {score}', False, (0, 0, 0))
     
     
     play_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 160), (250, 50)),
@@ -651,6 +658,13 @@ def game_over(score: int):
     exit_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 300), (250, 50)),
                                              text='Exit',
                                              manager=manager)
+    
+    # only 1 game object is needed!
+    game = Game()
+    
+    #stopping this game just set this to false
+    game_active = False
+    paused = False
     while is_running:
         time_delta = clock.tick(30)
         for event in pg.event.get():
@@ -659,8 +673,8 @@ def game_over(score: int):
             if event.type == pg.USEREVENT:
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == play_button:
-                        menu.game_active = True
-                        return
+                        game_active = True
+                        SCORE = 0
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == main_menu_button:
                         print('OK')
@@ -672,8 +686,25 @@ def game_over(score: int):
             manager.process_events(event)
         manager.update(time_delta)
         
+        if game_active:
+            #if game ongoing update it
+            if PAUSED:
+                paused()
+                PAUSED = False
+            #resume_button.hide()
+            #resume_button.disable()
+            play_button.disable()
+            exit_button.disable()
+            main_menu_button.disable()
+            main_menu_button.hide()
+            play_button.hide()
+            exit_button.hide()
+            game.update(window_surface)
+        else:
+            window_surface.blit(TitleText,(250, 25))
+            window_surface.blit(ScoreText,(365, 115))
+        
         manager.draw_ui(window_surface)
-        window_surface.blit(TitleText,(325, 25))
         pg.display.update()
     
     sys.exit()
@@ -681,4 +712,4 @@ def game_over(score: int):
 
 
 if __name__ == "__main__":
-    paused()
+    game_over()
