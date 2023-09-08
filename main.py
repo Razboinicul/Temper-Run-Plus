@@ -9,7 +9,7 @@ def main():
     is_running = True
     """This is the Game's main function"""
     pg.init()
-    pg.display.set_caption('Temper Run')
+    pg.display.set_caption('Temper Run Plus')
     window_surface = pg.display.set_mode((800, 600))
     
     #window_surface.fill(pg.Color('#87CEEB'))
@@ -22,8 +22,8 @@ def main():
                    # if you want to use this module.
     TitleFont = pg.font.SysFont('Arial', 80)
     VerFont = pg.font.SysFont('Calibri', 40)
-    TitleText = TitleFont.render('Temper Run', False, (0, 0, 0))
-    VerText = VerFont.render('2.0.0 alpha', False, (0, 0, 0))
+    TitleText = TitleFont.render('Temper Run', False, (255, 255, 255))
+    VerText = VerFont.render('2.0.0 alpha', False, (255, 255, 255))
     
     
     play_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 160), (250, 50)),
@@ -41,9 +41,6 @@ def main():
     Exit_button = gui.elements.UIButton(relative_rect=pg.Rect((418, 350), (125, 50)),
                                              text='Exit',
                                              manager=manager)
-
-    # only 1 game object is needed!
-    game = Game()
 
     
     #stopping this game just set this to false
@@ -64,6 +61,7 @@ def main():
             if event.type == pg.USEREVENT:
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == play_button:
+                        game = Game()
                         game_active = True
                         SCORE = 0
                         print('OK')
@@ -86,18 +84,40 @@ def main():
         manager.update(time_delta)
 
 
-        if game_active:
+        if game_active and not game.game_over:
             #if game ongoing update it
+            #resume_button.hide()
+            #resume_button.disable()
+            play_button.disable()
+            About_button.disable()
+            GG_button.disable()
+            Exit_button.disable()
+            play_button.hide()
+            About_button.hide()
+            GG_button.hide()
+            Exit_button.hide()
+            game.update(window_surface)
             if PAUSED:
                 paused()
                 PAUSED = False
-            game.update(window_surface)
+            score = game.update(window_surface)
+            ScoreText = VerFont.render(f'Score: {score}', False, (255, 255, 255))
+            window_surface.blit(ScoreText,(0, 0))
         else:
-            #window_surface.blit(bg, (0, 0))
-            manager.draw_ui(window_surface)
+            play_button.enable()
+            About_button.enable()
+            GG_button.enable()
+            Exit_button.enable()
+            play_button.show()
+            About_button.show()
+            GG_button.show()
+            Exit_button.show()
+            
+            window_surface.blit(bg, (0, 0))
             window_surface.blit(TitleText,(235, 25))
             window_surface.blit(VerText,(5, 561))
-
+        
+        manager.draw_ui(window_surface)
         pg.display.update()
     
     sys.exit()

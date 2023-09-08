@@ -388,7 +388,6 @@ class PlayerSprite(GameSprite):
 
     def update(self,seg):
         """handles animaion, and set rect x and y to fit the new segment"""
-
         # no need to cheak max offset since the center x is based on the segment %..
         self.rect.centerx = seg.screen_point["1"]["x"] - int(seg.half_road_width["1"]*self.offsetX)
         self.setZ(seg.point["1"]["z"])
@@ -490,12 +489,15 @@ class ParallaxBackground(GameSprite):
 
 class Game():
     def __init__(self):
+        global SCORE
+        SCORE = 0
         self.camera = Camera()
         self.road = Road(what_is_closure=400/8)  # Road is reset At it's init..(closure is what we define)
         self.road.update(self.camera)
         self.player = PlayerSprite()
         self.background =  ParallaxBackground()
-        
+        self.score = 0
+        self.game_over = False        
         self.player.position =  2500    # this has to divide by the length of each segment
         self.player.z = self.camera.z + self.player.position #position..
        
@@ -562,13 +564,18 @@ class Game():
         # TODO: make the close sprites overlap with out sprite ... by drawing the player between the segments
         # Cheak if the game ended this frame....#
         collision = self.player.detectColision(closeSprits)   # cheaking colision with all the sprites is kinda lazy..
-        if collision: game_over(SCORE)
-        else: SCORE+=1
+        if collision:
+            SCORE = int(self.score/30)
+            self.game_over = True
+            game_over(SCORE)
+        else:
+            self.score+=1
+            SCORE = int(self.score/30)
         #sleep(0.25) if collision else None
         
         collision = False
 
-        return True # returns if game ended and the results
+        return SCORE # returns if game ended and the results
 
 def paused():
     is_running = True
@@ -580,12 +587,12 @@ def paused():
     window_surface.fill(pg.Color('#87CEEB'))
     manager = gui.UIManager((800, 600))
     clock = pg.time.Clock()
-
+    
+    bg = pg.image.load("bg.png").convert_alpha()
     pg.font.init() # you have to call this at the start, 
                    # if you want to use this module.
     TitleFont = pg.font.SysFont('Arial', 80)
-    TitleText = TitleFont.render('Pause', False, (0, 0, 0))
-    
+    TitleText = TitleFont.render('Pause', False, (255, 255, 255))
     
     resume_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 160), (250, 50)),
                                              text='Resume',
@@ -611,11 +618,14 @@ def paused():
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == main_menu_button:
                         print('OK')
+                        main.main().game.game_over = True
                         return
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == exit_button:
-                        is_running = False 
-                
+                        is_running = False
+                        sys.exit()
+                window_surface.blit(bg, (0, 0))
+
             manager.process_events(event)
         manager.update(time_delta)
         
@@ -633,19 +643,18 @@ def game_over(sc: int = 0):
     pg.display.set_caption('Game Over')
     window_surface = pg.display.set_mode((800, 600))
     
-    score = int(sc/30)
-    
     window_surface.fill(pg.Color('#87CEEB'))
     manager = gui.UIManager((800, 600))
     clock = pg.time.Clock()
-
+    
+    bg = pg.image.load("bg.png").convert_alpha()
     pg.font.init() # you have to call this at the start, 
                    # if you want to use this module.
     TitleFont = pg.font.SysFont('Arial', 80)
-    TitleText = TitleFont.render('Game Over', False, (0, 0, 0))
+    TitleText = TitleFont.render('Game Over', False, (255, 255, 255))
     ScoreFont = pg.font.SysFont('Arial', 35)
-    ScoreText = ScoreFont.render(f'Score: {score}', False, (0, 0, 0))
-    
+    ScoreText = ScoreFont.render(f'Score: {SCORE}', False, (255, 255, 255))
+    VerFont = pg.font.SysFont('Calibri', 40)
     
     play_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 160), (250, 50)),
                                              text='Play Again',
@@ -699,8 +708,11 @@ def game_over(sc: int = 0):
             main_menu_button.hide()
             play_button.hide()
             exit_button.hide()
+            ScoreText = VerFont.render(f'Score: {SCORE}', False, (255, 255, 255))
             game.update(window_surface)
+            window_surface.blit(ScoreText,(0, 0))
         else:
+            window_surface.blit(bg, (0, 0))
             window_surface.blit(TitleText,(250, 25))
             window_surface.blit(ScoreText,(365, 115))
         
@@ -712,4 +724,4 @@ def game_over(sc: int = 0):
 
 
 if __name__ == "__main__":
-    game_over()
+    paused()
