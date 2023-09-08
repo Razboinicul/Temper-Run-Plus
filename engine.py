@@ -618,6 +618,7 @@ def paused():
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == main_menu_button:
                         print('OK')
+                        main.main().game.game_over = True
                         return
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == exit_button:
@@ -652,7 +653,7 @@ def game_over(sc: int = 0):
     TitleFont = pg.font.SysFont('Arial', 80)
     TitleText = TitleFont.render('Game Over', False, (255, 255, 255))
     ScoreFont = pg.font.SysFont('Arial', 35)
-    ScoreText = ScoreFont.render(f'Score: {score}', False, (255, 255, 255))
+    ScoreText = ScoreFont.render(f'Score: {SCORE}', False, (255, 255, 255))
     VerFont = pg.font.SysFont('Calibri', 40)
     
     play_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 160), (250, 50)),
