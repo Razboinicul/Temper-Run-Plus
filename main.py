@@ -2,10 +2,12 @@ import pygame as pg
 import sys
 import pygame_gui as gui
 from engine import *
+import packing
 new_game = 0
 
 def main():
     global PAUSED, new_game
+    high_score = packing.load()
     is_running = True
     """This is the Game's main function"""
     pg.init()
@@ -72,7 +74,8 @@ def main():
                         resume_button.show()
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == About_button:
-                        print('Coming Soon')
+                        print("About")
+                        about()
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == GG_button:
                         print('GG!')

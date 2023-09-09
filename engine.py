@@ -514,9 +514,9 @@ class Game():
         keys = pg.key.get_pressed()
         # Camera Move
         self.player.moveZ()
-        # if keys[K_UP]:
+        #if keys[K_UP]:
         #     self.player.moveZ()
-        # if keys[K_DOWN]:
+        #if keys[K_DOWN]:
         #     self.player.moveZ(direction = -1)
 
         # after giving the player a new z position, we want to get the segment he is on
@@ -542,7 +542,7 @@ class Game():
             self.camera.turn(angleX = 5)
         if keys[K_s]:
             self.camera.turn(angleX = -5)
-        if keys[K_p]:
+        if keys[K_ESCAPE] or keys[K_p]:
             paused()
 
         self.camera.setY(player_seg.point["1"]["y"])
@@ -635,12 +635,56 @@ def paused():
     
     sys.exit()
 
+def about():
+    is_running = True
+    """This is the Game's main function"""
+    pg.init()
+    pg.display.set_caption('Temper Run')
+    window_surface = pg.display.set_mode((800, 600))
+    
+    window_surface.fill(pg.Color('#87CEEB'))
+    manager = gui.UIManager((800, 600))
+    clock = pg.time.Clock()
+    
+    bg = pg.image.load("bg.png").convert_alpha()
+    pg.font.init() # you have to call this at the start, 
+                   # if you want to use this module.
+    TitleFont = pg.font.SysFont('Arial', 80)
+    TitleText = TitleFont.render('About', False, (255, 255, 255))
+    TextFont = pg.font.SysFont('Arial', 25)
+    AboutText = TextFont.render('Lorem ipsum dolor sit amet, consectetur adipiscing elit. \nPellentesque a sem odio. Donec nec accumsan erat.  \nSed in rhoncus mauris. Proin eleifend velit at ex pulvinar pulvinar. \nNunc sit amet elit sodales, hendrerit nunc ac, maximus nisl. Donec ac sodales nibh. \nNunc viverra enim eget est blandit tincidunt. Donec semper.', False, (255, 255, 255))
+
+    main_menu_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 500), (250, 50)),
+                                             text='Back',
+                                             manager=manager)
+    while is_running:
+        time_delta = clock.tick(30)
+        window_surface.blit(bg, (0, 0))
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                is_running = False
+            if event.type == pg.USEREVENT:
+                if event.user_type == gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == main_menu_button:
+                        print('OK')
+                        return
+
+            manager.process_events(event)
+        manager.update(time_delta)
+        
+        manager.draw_ui(window_surface)
+        window_surface.blit(TitleText,(325, 25))
+        window_surface.blit(AboutText,(10, 125))
+        pg.display.update()
+    
+    sys.exit()
+
 def game_over(sc: int = 0):
     global PAUSED, SCORE
     is_running = True
     """This is the Game's main function"""
     pg.init()
-    pg.display.set_caption('Game Over')
+    pg.display.set_caption('Temper Run')
     window_surface = pg.display.set_mode((800, 600))
     
     window_surface.fill(pg.Color('#87CEEB'))
@@ -724,4 +768,4 @@ def game_over(sc: int = 0):
 
 
 if __name__ == "__main__":
-    paused()
+    about()
