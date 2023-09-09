@@ -7,6 +7,7 @@ from math import tan, floor , radians, pi, cos, atan, sin, degrees, ceil
 from random import choice
 from time import sleep
 from copy import deepcopy
+from packing import set_high_score
 
 # TODO: get the actual screen size
 SCREEN_WIDTH = 800         #x resolution
@@ -679,10 +680,25 @@ def about():
     
     sys.exit()
 
-def game_over(sc: int = 0):
+def game_over():
+    """This is the Game's main function"""
     global PAUSED, SCORE
     is_running = True
-    """This is the Game's main function"""
+    pg.font.init() # you have to call this at the start, 
+                   # if you want to use this module.
+    TitleFont = pg.font.SysFont('Arial', 80)
+    TitleText = TitleFont.render('Game Over', False, (255, 255, 255))
+    ScoreFont = pg.font.SysFont('Arial', 35)
+    ScoreText = ScoreFont.render(f'Score: {SCORE}', False, (255, 255, 255))
+    VerFont = pg.font.SysFont('Calibri', 40)
+    if SCORE > main.high_score:
+        new_high_score = True
+        main.high_score = SCORE
+        set_high_score(SCORE)
+        HighScoreText = ScoreFont.render(f'New High Score: {main.high_score}', False, (255, 0, 0))
+    else:
+        new_high_score = False
+        HighScoreText = ScoreFont.render(f'High Score: {main.high_score}', False, (255, 255, 255))
     pg.init()
     pg.display.set_caption('Temper Run')
     window_surface = pg.display.set_mode((800, 600))
@@ -692,23 +708,16 @@ def game_over(sc: int = 0):
     clock = pg.time.Clock()
     
     bg = pg.image.load("bg.png").convert_alpha()
-    pg.font.init() # you have to call this at the start, 
-                   # if you want to use this module.
-    TitleFont = pg.font.SysFont('Arial', 80)
-    TitleText = TitleFont.render('Game Over', False, (255, 255, 255))
-    ScoreFont = pg.font.SysFont('Arial', 35)
-    ScoreText = ScoreFont.render(f'Score: {SCORE}', False, (255, 255, 255))
-    VerFont = pg.font.SysFont('Calibri', 40)
     
-    play_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 160), (250, 50)),
+    play_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 160+50), (250, 50)),
                                              text='Play Again',
                                              manager=manager)
 
-    main_menu_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 230), (250, 50)),
+    main_menu_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 230+50), (250, 50)),
                                              text='Go to Main Menu',
                                              manager=manager)
     
-    exit_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 300), (250, 50)),
+    exit_button = gui.elements.UIButton(relative_rect=pg.Rect((290, 300+50), (250, 50)),
                                              text='Exit',
                                              manager=manager)
     
@@ -759,6 +768,10 @@ def game_over(sc: int = 0):
             window_surface.blit(bg, (0, 0))
             window_surface.blit(TitleText,(250, 25))
             window_surface.blit(ScoreText,(365, 115))
+            if new_high_score:
+                window_surface.blit(HighScoreText,(295, 155))
+            else:
+                window_surface.blit(HighScoreText,(330, 155))
         
         manager.draw_ui(window_surface)
         pg.display.update()
@@ -768,4 +781,4 @@ def game_over(sc: int = 0):
 
 
 if __name__ == "__main__":
-    about()
+    game_over()

@@ -7,6 +7,10 @@ if system() == "Windows":
 else:
     tmpdir = gettempdir()+"/trtemp"
 
+def set_high_score(score: int = 0):
+    pak = load_pak("data.pak")
+    pak.high_score = score
+    save_pak(pak, "data.pak")
 
 def save():
     pak = PAK()
