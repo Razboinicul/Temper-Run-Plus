@@ -72,7 +72,8 @@ def main():
                         resume_button.show()
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == About_button:
-                        print('Coming Soon')
+                        print("About")
+                        about()
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == GG_button:
                         print('GG!')
