@@ -4,9 +4,10 @@ import pygame_gui as gui
 from engine import *
 import packing
 new_game = 0
+high_score = 0
 
 def main():
-    global PAUSED, new_game
+    global PAUSED, new_game, high_score
     high_score = packing.load()
     is_running = True
     """This is the Game's main function"""
