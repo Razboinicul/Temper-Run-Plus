@@ -380,12 +380,12 @@ class PlayerSprite(GameSprite):
     def detectColision(self, obstacles):
         """cheak if any sprite collided with the player, returns False on no colision"""
         # Simple colission for now... (works since I defined "closure, only close sprites will be cheaked.")
-        # TODO: colliosion is obs bot line is under 80% of the player rect 
+        # TODO: colliosion is obs bot line is under 80% of the player rect
         # TODO: handle collision with the sprites
+        collision = {}
         for obstacle in obstacles:
-            if self.rect.colliderect(obstacle.rect):
-                return True
-        return False
+            collision[obstacle] = self.rect.colliderect(obstacle.rect)
+        return collision
 
     def update(self,seg):
         """handles animaion, and set rect x and y to fit the new segment"""
@@ -564,17 +564,15 @@ class Game():
         # TODO: handle collectables collision
         # TODO: make the close sprites overlap with out sprite ... by drawing the player between the segments
         # Cheak if the game ended this frame....#
-        collision = self.player.detectColision(closeSprits)   # cheaking colision with all the sprites is kinda lazy..
-        if collision:
-            SCORE = int(self.score/30)
-            self.game_over = True
-            game_over(SCORE)
-        else:
-            self.score+=1
-            SCORE = int(self.score/30)
-        #sleep(0.25) if collision else None
-        
-        collision = False
+        collision = self.player.detectColision(closeSprits)
+        for i in collision.keys():
+            if type(i) == Obsticale and collision[i]:
+                SCORE = int(self.score/30)
+                self.game_over = True
+                game_over()
+            else:
+                self.score+=1
+                SCORE = int(self.score/30)
 
         return SCORE # returns if game ended and the results
 
@@ -740,6 +738,7 @@ def game_over():
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == main_menu_button:
                         print('OK')
+                        main.main().game.game_over = True
                         return
                 if event.user_type == gui.UI_BUTTON_PRESSED:
                     if event.ui_element == exit_button:
