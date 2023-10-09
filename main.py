@@ -3,7 +3,6 @@ import sys
 import pygame_gui as gui
 from engine import *
 import packing
-new_game = 0
 high_score = 0
 
 def main():
@@ -51,13 +50,6 @@ def main():
     paused = False
     while is_running:
         time_delta = clock.tick(30)
-        if new_game == 1:
-            game_active = False
-            game = None
-        if new_game == 2:
-            game = Game()
-            game_active = True
-            new_game = 0
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 is_running = False
@@ -69,21 +61,17 @@ def main():
                         SCORE = 0
                         print('OK')
                 if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_p:
-                        pause()
-                        window_surface.fill(pg.Color('#87CEEB'))
-                        resume_button.show()
-                if event.user_type == gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == About_button:
-                        print("About")
-                        about()
-                if event.user_type == gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == GG_button:
-                        print('GG!')
-                if event.user_type == gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == Exit_button:
-                        is_running = False   
-                
+                    if event.user_type == gui.UI_BUTTON_PRESSED:
+                        if event.ui_element == About_button:
+                            print("About")
+                            about()
+                    if event.user_type == gui.UI_BUTTON_PRESSED:
+                        if event.ui_element == GG_button:
+                            print('GG!')
+                    if event.user_type == gui.UI_BUTTON_PRESSED:
+                        if event.ui_element == Exit_button:
+                            is_running = False   
+                    
             manager.process_events(event)
         manager.update(time_delta)
 

@@ -4,7 +4,7 @@ import main
 import sys
 from pygame.locals import *
 from math import tan, floor , radians, pi, cos, atan, sin, degrees, ceil
-from random import choice
+from random import choice, randint
 from time import sleep
 from copy import deepcopy
 from packing import set_high_score
@@ -384,7 +384,7 @@ class PlayerSprite(GameSprite):
         # TODO: handle collision with the sprites
         collision = {}
         for obstacle in obstacles:
-            collision[obstacle] = self.rect.colliderect(obstacle.rect)
+            collision[obstacle] = self.rect.colliderect(obstacle.rect) and not obstacle.stopped
         return collision
 
     def update(self,seg):
@@ -430,29 +430,46 @@ class Obsticale(GameSprite):
         super().__init__()
         self.height = 500
         self.width = 500
-        self.animation_frames = {
-            "idle":{"images":[
-                pg.transform.scale(pg.image.load(r"spikes_1.png"),(self.width, self.height)).convert_alpha(),
-                pg.transform.scale(pg.image.load(r"spikes_2.png"),(self.width, self.height)).convert_alpha()], "cycleSpeed":35}  
-        }
+        self.stopped = False
+        if randint(1, 3) == 1:
+            self.coin = True
+            self.animation_frames = {
+                "idle":{"images":[
+                    pg.transform.scale(pg.image.load(r"Space.png"),(self.width, self.height)).convert_alpha(),
+                    pg.transform.scale(pg.image.load(r"bg.png"),(self.width, self.height)).convert_alpha()], "cycleSpeed":35}  
+            }
+        else:
+            self.coin = False
+            self.animation_frames = {
+                "idle":{"images":[
+                    pg.transform.scale(pg.image.load(r"spikes_1.png"),(self.width, self.height)).convert_alpha(),
+                    pg.transform.scale(pg.image.load(r"spikes_2.png"),(self.width, self.height)).convert_alpha()], "cycleSpeed":35}  
+            }
         self.animationData={"animation":"idle", "frame":0,"sinceLast":0}    
         self.image  = self.current_image = self.animation_frames["idle"]["images"][0]
         self.rect = self.image.get_rect(midbottom = (0,0))
         self.road_offset = 0    # x location reletive to segment 
  
     def draw(self, surface , midbottom , scale):
-        self.rect.midbottom = (midbottom[0]+int(self.road_offset*scale), midbottom[1])  #need to scale the offset too!
-        self.rect.width = int(scale *self.width)
-        self.rect.height = int(scale *self.height)
-        # we scale the ORIGINAL image of the animation and put it in the image,not a rescale!
-        self.image = pg.transform.scale(self.current_image, 
-         (self.rect.width, self.rect.height))
-        super().draw(surface)
+        global SCREEN_HEIGHT
+        if self.rect.midbottom[1] < -SCREEN_HEIGHT:
+            self.stopped = True
+            self.rect.move(10000, 10000)
+            print("Stop")
+        if not self.stopped:
+            self.rect.midbottom = (midbottom[0]+int(self.road_offset*scale), midbottom[1])  #need to scale the offset too!
+            self.rect.width = int(scale *self.width)
+            self.rect.height = int(scale *self.height)
+            # we scale the ORIGINAL image of the animation and put it in the image,not a rescale!
+            self.image = pg.transform.scale(self.current_image, 
+             (self.rect.width, self.rect.height))
+            super().draw(surface)
 
     def update(self):
         """increase the size of self rect, image, each call.
         on max size Obsticale is killed"""
-        super().animate()
+        if not self.stopped:
+            super().animate()
 
 class ParallaxBackground(GameSprite):
     def __init__(self):
@@ -493,7 +510,7 @@ class Game():
         global SCORE
         SCORE = 0
         self.camera = Camera()
-        self.road = Road(what_is_closure=400/8)  # Road is reset At it's init..(closure is what we define)
+        self.road = Road(what_is_closure=400)  # Road is reset At it's init..(closure is what we define)
         self.road.update(self.camera)
         self.player = PlayerSprite()
         self.background =  ParallaxBackground()
@@ -566,13 +583,12 @@ class Game():
         # Cheak if the game ended this frame....#
         collision = self.player.detectColision(closeSprits)
         for i in collision.keys():
-            if type(i) == Obsticale and collision[i]:
-                SCORE = int(self.score/30)
+            if type(i) == Obsticale and collision[i] and not i.coin and not i.stopped:
                 self.game_over = True
                 game_over()
-            else:
-                self.score+=1
-                SCORE = int(self.score/30)
+            if type(i) == Obsticale and collision[i] and i.coin and not i.stopped:
+                SCORE += 1
+                i.stopped = True
 
         return SCORE # returns if game ended and the results
 
