@@ -27,6 +27,10 @@ PLAYER_SPRITE_RUNNING = [(158, 85,327,779),(806,121,348,764),(1436,165,358,767),
 ROAD_PROPS = {"length":{"short":25, "medium":50, "long":100},
               "curve":{"none":0, "easy":1,"medium":2,"hard":3},
               "hill":{"none":0, "easy":20,"medium":40,"hard":60}}
+# degrees to radians
+def deg2rad(degrees):
+    return degrees * (pi / 180)
+
 
 # image load helper
 def get_image(surf, x, y, width, height):  # gets sprite  x,y width, height,
