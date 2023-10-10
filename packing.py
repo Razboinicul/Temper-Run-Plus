@@ -1,7 +1,7 @@
 from pythonic_archive_kit import PAK, save_pak, load_pak
 from tempfile import gettempdir
 from platform import system
-from os import chdir, makedirs, getcwd
+from os import chdir, makedirs, getcwd, path
 if system() == "Windows":
     tmpdir = gettempdir()+"\\trtemp"
 else:
@@ -25,8 +25,11 @@ def save():
 
 def load():
     pak = load_pak("data.pak")
-    chdir(tmpdir)
-    print(getcwd())
+    if path.exists(tmpdir):
+      chdir(tmpdir)
+    else:
+      makedirs(tmpdir)
+      chdir(tmpdir)
     for i in pak.files.keys():
         f = open(i, "wb+")
         f.write(pak.files[i])
